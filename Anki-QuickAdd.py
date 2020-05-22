@@ -7,6 +7,7 @@ import sys
 import urllib.request
 
 from PyQt5 import uic
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QDesktopWidget
 from PyQt5.QtWidgets import QLabel, QLineEdit
 
@@ -55,6 +56,7 @@ class QuickaddGuiClass(gui_base_object, gui_window_object):
         super(gui_base_object, self).__init__()
         self.setupUi(self)
         self.setWindowTitle("Anki QuickAdd")
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         # Center GUI on screen
         qt_rectangle = self.frameGeometry()
