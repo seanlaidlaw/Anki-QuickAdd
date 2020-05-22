@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+import platform
+import pathlib
 import signal
 import sys
 import urllib.request
@@ -78,11 +80,42 @@ class QuickaddGuiClass(gui_base_object, gui_window_object):
         center_point = QDesktopWidget().availableGeometry().center()
         qt_rectangle.moveCenter(center_point)
 
+        # determine where to store name of most recent deck/card
+        home_dir = os.path.expanduser('~')
+        if platform.system() == "Linux":
+                quickadd_dir = home_dir + "/.anki-quickadd/"
+        elif platform.system() == "Darwin":
+                quickadd_dir = home_dir + "/Library/Caches/Anki-Quickadd/"
+        elif platform.system() == "Windows":
+                quickadd_dir = os.path.expandvars(r'%APPDATA%\Anki-Quickadd\\')
+
+        # make data folder and parent folders if they don't exist
+        pathlib.Path(quickadd_dir).mkdir(parents=True, exist_ok=True)
+
+        self.quickadd_deck = os.path.join(quickadd_dir, "quickadd_deck.txt")
+        self.quickadd_card = os.path.join(quickadd_dir, "quickadd_card.txt")
+
+
         # get information to populate dialog
         deck_list = invoke("deckNames")
         self.deck_comboBox.addItems(deck_list)
         model_names = invoke("modelNames")
         self.card_comboBox.addItems(model_names)
+
+        # load last used deck name and card name as default
+        if os.path.isfile(self.quickadd_deck):
+            with open(self.quickadd_deck, "r") as myfile:
+                last_deck = myfile.readline()
+                index = self.deck_comboBox.findText(last_deck, Qt.MatchFixedString)
+                if index >= 0:
+                    self.deck_comboBox.setCurrentIndex(index)
+
+        if os.path.isfile(self.quickadd_card):
+            with open(self.quickadd_card, "r") as myfile:
+                last_card = myfile.readline()
+                index = self.card_comboBox.findText(last_card, Qt.MatchFixedString)
+                if index >= 0:
+                    self.card_comboBox.setCurrentIndex(index)
 
         # load fields for default card
         self.changed_card_comboBox()
@@ -129,6 +162,11 @@ class QuickaddGuiClass(gui_base_object, gui_window_object):
             "fields": inputs_dict,
             "tags": tags_list
         }
+
+        with open(self.quickadd_deck, "w") as myfile:
+            myfile.write(self.deck_comboBox.currentText())
+        with open(self.quickadd_card, "w") as myfile:
+            myfile.write(self.card_comboBox.currentText())
 
         # submit json to Anki-Connect
         try:
