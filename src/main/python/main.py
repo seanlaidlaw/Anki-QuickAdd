@@ -114,6 +114,8 @@ class QuickaddGuiClass(gui_base_object, gui_window_object):
 
     def add_fields_to_anki(self):
         # create a dict of lineedits
+        tags_list = self.tags_lineedit.text()
+        tags_list = tags_list.split(' ')
         i = 0
         inputs_dict = {}
         for inputs in self.card_fields_inputs:
@@ -125,6 +127,7 @@ class QuickaddGuiClass(gui_base_object, gui_window_object):
             "deckName": self.deck_comboBox.currentText(),
             "modelName": self.card_comboBox.currentText(),
             "fields": inputs_dict,
+            "tags": tags_list
         }
 
         # submit json to Anki-Connect
