@@ -10,6 +10,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QDesktopWidget, QMessageBox
 from PyQt5.QtWidgets import QLabel, QLineEdit
+from fbs_runtime.application_context.PyQt5 import ApplicationContext
 
 
 # Default AnkiConnect API functions
@@ -38,21 +39,13 @@ def invoke(action, **params):
 # allow <Ctrl-c> from terminal to terminate the GUI
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-# Interface XML files
-current_file_path = __file__
-current_file_dir = os.path.dirname(current_file_path)
-GUIui = os.path.join(current_file_dir, "AnkiQuickAdd_layout.ui")
-
-# Build graphical interface constructed in XML
-gui_window_object, gui_base_object = uic.loadUiType(GUIui)
-
 
 # define error dialog
 def throw_error_message(error_message):
     """
-	Displays an error dialog with a message. Accepts one string
-	as argument for the message to display.
-	"""
+    Displays an error dialog with a message. Accepts one string
+    as argument for the message to display.
+    """
     print("Error: " + error_message)
     error_dialog = QMessageBox()
     error_dialog.setIcon(QMessageBox.Critical)
@@ -60,6 +53,13 @@ def throw_error_message(error_message):
     error_dialog.setText(error_message)
     error_dialog.setStandardButtons(QMessageBox.Ok)
     error_dialog.exec_()
+
+# App context for fbs
+appctxt = ApplicationContext()
+
+# Build graphical interface constructed in XML
+GUIui = appctxt.get_resource('AnkiQuickAdd_layout.ui')
+gui_window_object, gui_base_object = uic.loadUiType(GUIui)
 
 
 class QuickaddGuiClass(gui_base_object, gui_window_object):
@@ -145,4 +145,6 @@ if __name__ == "__main__":
     QuickaddGui.show()
 
     # exit program on quitting the GUI
-    sys.exit(QuickaddApp.exec_())
+    # sys.exit(QuickaddApp.exec_())
+    exit_code = appctxt.app.exec_()
+    sys.exit(exit_code)
