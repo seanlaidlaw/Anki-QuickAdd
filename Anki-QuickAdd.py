@@ -8,7 +8,7 @@ import urllib.request
 
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QDesktopWidget
+from PyQt5.QtWidgets import QApplication, QDesktopWidget, QMessageBox
 from PyQt5.QtWidgets import QLabel, QLineEdit
 
 
@@ -45,6 +45,21 @@ GUIui = os.path.join(current_file_dir, "AnkiQuickAdd_layout.ui")
 
 # Build graphical interface constructed in XML
 gui_window_object, gui_base_object = uic.loadUiType(GUIui)
+
+
+# define error dialog
+def throw_error_message(error_message):
+    """
+	Displays an error dialog with a message. Accepts one string
+	as argument for the message to display.
+	"""
+    print("Error: " + error_message)
+    error_dialog = QMessageBox()
+    error_dialog.setIcon(QMessageBox.Critical)
+    error_dialog.setWindowTitle("Error!")
+    error_dialog.setText(error_message)
+    error_dialog.setStandardButtons(QMessageBox.Ok)
+    error_dialog.exec_()
 
 
 class QuickaddGuiClass(gui_base_object, gui_window_object):
@@ -113,10 +128,13 @@ class QuickaddGuiClass(gui_base_object, gui_window_object):
         }
 
         # submit json to Anki-Connect
-        invoke("addNote", note=add_json)
+        try:
+            invoke("addNote", note=add_json)
 
-        # close Anki QuickAdd on add
-        QuickaddApp.quit()
+            # close Anki QuickAdd on add
+            QuickaddApp.quit()
+        except Exception:
+            throw_error_message(str(sys.exc_info()[1]))
 
 
 if __name__ == "__main__":
